@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
-import { Container, Content, Header, Form, Input, Item, Button, Label, Icon} from 'native-base';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { Input, Item, Button, Icon} from 'native-base';
 
 import firebase from './firebase';
 
@@ -10,39 +10,32 @@ todoDatabase = firebase.database().ref('todo');
 
   state = { todos: {}, selectedId: '' }
 
-//Read
+//Read data
   componentDidMount() {
     this.todoDatabase.on('value', todos => {
       const todosJSON = todos.val();
       this.setState({ todos: todosJSON === null ? {} : todosJSON });
     })
-    // this.carDatabase.push({color: 'black'})
   }
 
-  //create
+  //Create data retrieved from input
   create(data) {
-    // this.carDatabase
-    // .push({color: 'purple'})
     var key = firebase.database().ref('todo').push({task: data}).key
     firebase.database().ref('todo').child(key).set({task: data})
   }
 
-  //update
+  //Update
   update(){
     this.todoDatabase.child(this.state.selectedId).set({task:'white'})
   }
 
-  //delete
+  //Delete data
   deleteList(data){
     if(this.state.selectedId === ''){
       return;
     }
     this.todoDatabase.child(this.state.selectedId).set(null)
     this.setState({selectedId:''})
-
-
-
-
   }
 
 
@@ -53,6 +46,8 @@ todoDatabase = firebase.database().ref('todo');
             <Text style={styles.headertext}>My To-Do-List</Text>
         </View>
 
+
+        {/* Add new value to firebase */}
         <Item>
               <Input 
                 onChangeText = {(newTask) => this.setState({newTask})}
@@ -63,41 +58,33 @@ todoDatabase = firebase.database().ref('todo');
               </Button>
         </Item>
 
-        <ScrollView>
 
-        
-        {/* <TextInput value={this.state.selectedId} style={styles.textInput}></TextInput>
-        <Button title="Create" onPress={() => this.create() }></Button>
-        <Button title="Update" onPress={() => this.update() }></Button>
-        <Button title="Delete" onPress={() => this.deleteCar() }></Button> */}
+        {/* Where and how data will be shown to the user */}
+        <ScrollView>
         {
-          
           Object.keys(this.state.todos).map( (data, index) =>
             <TouchableOpacity key={index} onPress={() => this.setState({selectedId: data})}>
-           
-                
-                {/* <Text>{`${data}: ${JSON.stringify(this.state.cars[data])}`}</Text>  */}
                 <Text style={styles.content}>{JSON.stringify(this.state.todos[data])}</Text> 
-
-             
             </TouchableOpacity>
           )
         }
-
         </ScrollView>
         
+        {/* Delete data based on Id from firebase */}
         <Item style={styles.deleteList}>
-          
-        <TextInput placeholder="Click any task to delete" value={this.state.selectedId} style={styles.textInput}></TextInput>
-        <Button>
-          <Icon name="trash" onPress={() => this.deleteList()}/>
-        </Button>
+          <TextInput placeholder="Click any task to delete" value={this.state.selectedId} style={styles.textInput}></TextInput>
+          <Button>
+            <Icon name="trash" onPress={() => this.deleteList()}/>
+          </Button>
         </Item>
 
       </View>
     );
   }
 }
+
+
+// Stylesheet
 
 const styles = StyleSheet.create({
   container: {
